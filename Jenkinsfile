@@ -1,8 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:latest'  
+            args '-u root'       
+        }
+    }
 
     environment {
-        IMAGE_NAME = "yourdockerhubusername/nodejs-jenkins"
+        DOCKER_IMAGE = "syedmuqeem03/nodejs-jenkins"
     }
 
     stages {
@@ -10,7 +15,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/your-username/jenkins-nodejs-ci-cd.git'
+                    url: 'https://github.com/SyedMuqeem03/nodejs-jenkins'
             }
         }
 
@@ -20,6 +25,12 @@ pipeline {
             }
         }
 
+        // stage('Static Code Analysis') {
+        //     steps {
+        //         // sh 'npm run lint'
+        //     }
+        // }
+
         stage('Run Tests') {
             steps {
                 sh 'npm test'
@@ -28,18 +39,27 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
+                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASS')]) {
-                    sh '''
-                      echo $DOCKER_PASS | docker login -u yourdockerhubusername --password-stdin
-                      docker push $IMAGE_NAME:$BUILD_NUMBER
-                    '''
-                }
+                sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
             }
         }
     }
@@ -53,4 +73,3 @@ pipeline {
         }
     }
 }
-

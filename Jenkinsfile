@@ -1,17 +1,11 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:latest'  
-            args '-u root'       
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "syedmuqeem03/nodejs-jenkins"
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
@@ -21,19 +15,17 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                docker.image('node:latest').inside {
+                    sh 'npm install'
+                }
             }
         }
 
-        // stage('Static Code Analysis') {
-        //     steps {
-        //         // sh 'npm run lint'
-        //     }
-        // }
-
         stage('Run Tests') {
             steps {
-                sh 'npm test'
+                docker.image('node:latest').inside {
+                    sh 'npm test'
+                }
             }
         }
 
@@ -73,3 +65,4 @@ pipeline {
         }
     }
 }
+

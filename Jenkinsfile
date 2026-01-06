@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:latest'  
+            args '-u root'       
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "syedmuqeem03/nodejs-jenkins"
@@ -22,7 +27,6 @@ pipeline {
 
         stage('Static Code Analysis') {
             steps {
-                // Run ESLint linting
                 sh 'npm run lint'
             }
         }

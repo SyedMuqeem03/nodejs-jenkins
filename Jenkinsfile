@@ -14,18 +14,26 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps {
-                docker.image('node:latest').inside {
-                    sh 'npm install'
+            agent {
+                docker {
+                    image 'node:latest'
+                    args '-u root'
                 }
+            }
+            steps {
+                sh 'npm install'
             }
         }
 
         stage('Run Tests') {
-            steps {
-                docker.image('node:latest').inside {
-                    sh 'npm test'
+            agent {
+                docker {
+                    image 'node:latest'
+                    args '-u root'
                 }
+            }
+            steps {
+                sh 'npm test'
             }
         }
 
@@ -65,4 +73,3 @@ pipeline {
         }
     }
 }
-

@@ -25,11 +25,11 @@ pipeline {
             }
         }
 
-        stage('Static Code Analysis') {
-            steps {
-                // sh 'npm run lint'
-            }
-        }
+        // stage('Static Code Analysis') {
+        //     steps {
+        //         // sh 'npm run lint'
+        //     }
+        // }
 
         stage('Run Tests') {
             steps {
